@@ -9,6 +9,8 @@ class DynamoDBStore(StoreBase):
     """
     _id: str = 'key'
     _value: str = 'value'
+    _ttl: str = 'ttl'
+    
     def __init__(self, store) -> None:
         super().__init__(store)
     
@@ -31,28 +33,36 @@ class DynamoDBStore(StoreBase):
                 raise error
         return table
     
-    def get(self, key):
+    def get(self, key, return_item=False):
         table = self._table()
         response = table.get_item(
             Key={DynamoDBStore._id: key},
         )
+        if return_item:
+            return response.get('Item',{})
         return response.get('Item',{}).get(DynamoDBStore._value)
     
-    def put(self, key, value):
+    def put(self, key, value, ttl=0):
         table = self._table()
+        update_expression = 'ADD #counter :increment SET #value = :value, #created_at = if_not_exists(#created_at, :now)'
+        ttl_value = int(time.time())+ttl
+        if ttl>0:
+            update_expression += ', #ttl = :ttl'
         response = table.update_item(
             Key={DynamoDBStore._id: key},
             ReturnValues='ALL_OLD',
-            UpdateExpression=f'ADD #counter :increment SET #value = :value, #created_at = if_not_exists(#created_at, :now)',
+            UpdateExpression=update_expression,
             ExpressionAttributeNames={
                 '#value': DynamoDBStore._value,
                 '#counter': 'access_counter',
                 '#created_at': 'created_at',
+                '#ttl': DynamoDBStore._ttl
             },
             ExpressionAttributeValues={
                 ':increment': 1,
                 ':value': value,
-                ':now': int(time.time())
+                ':now': int(time.time()),
+                ':ttl': ttl_value,
             }
             )
         return response.get('Attributes')

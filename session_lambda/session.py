@@ -20,13 +20,15 @@ class _session:
             func, 
             id_key_name="session-id", 
             update=False,
-            return_session_id_in_header=True
+            return_session_id_in_header=True,
+            ttl=0
         ):
         self.func = func
         self.id_key_name = id_key_name
         self.update = update
         self._first_call = True
         self._return_session_id_in_header=return_session_id_in_header
+        self._ttl_in_seconds = ttl
         setattr(self, "_state", State(value=None, key=None))
         
     @classmethod
@@ -60,11 +62,12 @@ class _session:
             raise SessionDataNotSet("Session data is not set")
         
         if self._first_call or self.update:
-            self.store.put(key=self.state.key, value=self.state.value)
+            self.store.put(key=self.state.key, value=self.state.value, ttl=self._ttl_in_seconds)
 
     def _set_session_id_in_header(self, response):
-        if "headers" in response:
-            response["headers"][self.id_key_name] = self.state.key
+        if isinstance(response, dict):
+            if "headers" in response:
+                response["headers"][self.id_key_name] = self.state.key
         return response
             
     def __call__(self, event, context):
@@ -90,13 +93,14 @@ def session(
         f=None, 
         id_key_name="session-id", 
         update=False,
-        return_session_id_in_header=True
+        return_session_id_in_header=True,
+        ttl=0,
     ):
     if f is not None:
         return _session(f)
     else:
         def wrapper(f):
-            return _session(f, id_key_name, update)
+            return _session(f, id_key_name, update, return_session_id_in_header, ttl)
         return wrapper
     
     

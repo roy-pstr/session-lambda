@@ -17,5 +17,5 @@ class StoreBase(ABC):
         ...
     
     @abstractmethod
-    def put(self, key, value):
+    def put(self, key, value, ttl=0):
         ...

@@ -6,7 +6,7 @@ sys.path.append(str(rootDir))
 import uuid
 from session_lambda import session, set_session_data, get_session_data
 
-@session
+@session(ttl=60)
 def lambda_handler(event, context):
     
     session_data = get_session_data()

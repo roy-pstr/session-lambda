@@ -47,4 +47,11 @@ def dynamodb_table_name(aws_credentials, TABLE_NAME):
             ],
             BillingMode="PAY_PER_REQUEST"
         )
+        client.update_time_to_live(
+                TableName=TABLE_NAME,
+                TimeToLiveSpecification={
+                    'Enabled': True,
+                    'AttributeName': 'ttl'
+                }
+            )
         yield TABLE_NAME

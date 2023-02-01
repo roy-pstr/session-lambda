@@ -39,3 +39,19 @@ def test_local_store(_Store: StoreBase, store):
 def test_dynamodb_store(dynamodb_table_name, repeat):
     store = DynamoDBStore(dynamodb_table_name)
     store_scenario(store)
+
+def test_dynamodb_store_ttl(dynamodb_table_name):
+    # test ttl with store.put when store is DynamoDBStore
+    store = DynamoDBStore(dynamodb_table_name)
+    store.put('foo', 'bar', ttl=0)
+    item = store.get('foo', return_item=True)
+    assert 'ttl' not in item
+    store.put('foo', 'bar', ttl=1)
+    item = store.get('foo', return_item=True)
+    assert 'ttl' in item
+    first_ttl = item['ttl']
+    store.put('foo', 'bar', ttl=10)
+    item = store.get('foo', return_item=True)
+    second_ttl = item['ttl']
+    assert second_ttl > first_ttl
+    
