@@ -19,7 +19,7 @@ from session_lambda import session, set_session_data, get_session_data
 @session
 def lambda_handler(event, context):
     print(get_session_data())
-    set_session_data((get_session_data() or [])+[str(time.time())])
+    set_session_data((get_session_data() or 0)+1)
     return {"headers":{}}
 ```
 ```python
@@ -38,9 +38,9 @@ lambda_handler({'headers':{}}, {})
 You should get the following prints:
 ```python
 None
-['1675291378.118798']
-['1675291378.118798']
-['1675291378.118798']
+1
+1
+1
 None
 ```
 This time using the `update=True` mode:
@@ -51,7 +51,7 @@ from session_lambda import session, set_session_data, get_session_data
 @session(update=True)
 def lambda_handler(event, context):
     print(get_session_data())
-    set_session_data((get_session_data() or [])+[str(time.time())])
+    set_session_data((get_session_data() or 0)+1)
     return {"headers":{}}
 ```
 ```python
@@ -70,9 +70,9 @@ lambda_handler({'headers':{}}, {})
 Now you should see:
 ```python
 None
-['1675291406.785664']
-['1675291406.785664', '1675291407.565578']
-['1675291406.785664', '1675291407.565578', '1675291408.384397']
+1
+2
+3
 None
 ```
 
@@ -83,7 +83,7 @@ def lambda_handler(event, context):
     ...
 ```
 - `id_key_name` is the expected key name in the `event[headers]`. It is default to `session-id`. It is case-sensitive.
-- `update` flag let you decide weather to update the session data each call or just not. It is default to `False`.
+- `update` flag control weather `set_sessions_data` updates the data. It is default to `False`.
 - `ttl` is seconds interval for the session to live (since the last update time). By default it is disabled. Any value larger then 0 will enable this feature. Make sure to set the TTL key name in your dynamodb to `ttl`.
 
 ## Future Features
