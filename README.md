@@ -1,6 +1,8 @@
+![alt text](assets/session_management_with.jpg)
+
 # Session Lambda
 A simple way to manage sessions for AWS Lambdas
-![alt text](assets/session_management_with.jpg)
+
 ## Install
 ```
 pip install session-lambda
