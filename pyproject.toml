@@ -5,7 +5,9 @@ description = "A simple session manager for aws lambda function using dynamodb"
 authors = ["Roy Pasternak <roy.pasternakk@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/roy-pstr/session-lambda"
 packages = [{include = "session_lambda"}]
+keywords = ['aws lambda', 'session', 'dynamodb']
 
 [tool.poetry.dependencies]
 python = "^3.7"

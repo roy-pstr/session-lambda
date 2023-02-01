@@ -13,7 +13,6 @@ export SESSION_LAMBDA_DYNAMODB_TABLE_NAME=<table-name>
 ```
 Run the following python code:
 ```
-import uuid
 from session_lambda import session, set_session_data, get_session_data
 
 @session
@@ -28,11 +27,9 @@ def lambda_handler(event, context):
     return {"session_data_before": session_data, "session_data_after": get_session_data()}
     
         
-session_id_0 = str(uuid.uuid4())
-session_id_1 = str(uuid.uuid4())
-print(lambda_handler({'headers':{"session-id": session_id_0}}, {}))
-print(lambda_handler({'headers':{"session-id": session_id_0}}, {}))
-print(lambda_handler({'headers':{"session-id": session_id_1}}, {}))
+print(lambda_handler({'headers':{"session-id": "0"}}, {}))
+print(lambda_handler({'headers':{"session-id": "0"}}, {}))
+print(lambda_handler({'headers':{"session-id": "1"}}, {}))
 ```
 You should get the following prints:
 ```
