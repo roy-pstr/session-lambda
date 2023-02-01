@@ -47,7 +47,7 @@ def lambda_handler(event, context):
 - `id_key_name` is the expected key name in the `event[headers]`. It is default to `session-id`. It is case-sensitive.
 - `update` flag let you decide weather to update the session data each call or just not. It is default to `False`.
 - `return_session_id_in_header` flag lets you control is the `session-id` is added to the response's headers (if `headers` exists in response). It is default to `True`.
+- `ttl` is seconds interval for the session to live. By default it is disabled. Any value larger then 0 will enable this feature. Make sure to set the TTL key name in your dynamodb to `ttl`.
 
 ## Future Features
-- Support TTL
 - Support Schema validation for session data
