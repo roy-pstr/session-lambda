@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "session_lambda"
-version = "0.1.0"
+version = "0.1.1"
 description = "A simple session manager for aws lambda function using dynamodb"
 authors = ["Roy Pasternak <roy.pasternakk@gmail.com>"]
 license = "MIT"
