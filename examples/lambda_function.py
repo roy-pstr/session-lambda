@@ -6,10 +6,10 @@ sys.path.append(str(rootDir))
 import time
 from session_lambda import session, set_session_data, get_session_data
 
-@session(update=True)
+@session
 def lambda_handler(event, context):
     print(get_session_data())
-    set_session_data((get_session_data() or [])+[str(time.time())])
+    set_session_data((get_session_data() or 0)+1)
     return {"headers":{}}
 
 # first client_a call 
