@@ -8,11 +8,11 @@ pip install session-lambda
 
 ## Usage
 Set `SESSION_LAMBDA_DYNAMODB_TABLE_NAME` env var:
-```
+```bash
 export SESSION_LAMBDA_DYNAMODB_TABLE_NAME=<table-name>
 ```
 Run the following python code:
-```
+```python
 import time
 from session_lambda import session, set_session_data, get_session_data
 
@@ -21,7 +21,8 @@ def lambda_handler(event, context):
     print(get_session_data())
     set_session_data((get_session_data() or [])+[str(time.time())])
     return {"headers":{}}
-
+```
+```python
 # first client_a call 
 response = lambda_handler({'headers':{}}, {})  
 # get session id from response (created by the server)
@@ -35,7 +36,7 @@ lambda_handler({'headers':{'session-id':session_id}}, {})
 lambda_handler({'headers':{}}, {})
 ```
 You should get the following prints:
-```
+```python
 None
 ['1675291378.118798']
 ['1675291378.118798']
@@ -43,7 +44,7 @@ None
 None
 ```
 This time using the `update=True` mode:
-```
+```python
 import time
 from session_lambda import session, set_session_data, get_session_data
 
@@ -52,7 +53,8 @@ def lambda_handler(event, context):
     print(get_session_data())
     set_session_data((get_session_data() or [])+[str(time.time())])
     return {"headers":{}}
-
+```
+```python
 # first client_a call 
 response = lambda_handler({'headers':{}}, {})  
 # get session id from response (created by the server)
@@ -66,7 +68,7 @@ lambda_handler({'headers':{'session-id':session_id}}, {})
 lambda_handler({'headers':{}}, {})
 ```
 Now you should see:
-```
+```python
 None
 ['1675291406.785664']
 ['1675291406.785664', '1675291407.565578']
@@ -75,7 +77,7 @@ None
 ```
 
 ## Features
-```
+```python
 @session(id_key_name='session-id', update=False, ttl=0)
 def lambda_handler(event, context):
     ...
