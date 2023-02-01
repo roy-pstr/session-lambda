@@ -14,6 +14,6 @@ class RuntimeStore(StoreBase):
     def get(self, key):
         return self._store.get(key)
     
-    def put(self, key, value):
+    def put(self, key, value, ttl=0):
         self._store[key] = value
         return value

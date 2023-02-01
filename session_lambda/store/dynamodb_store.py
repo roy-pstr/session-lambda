@@ -45,24 +45,28 @@ class DynamoDBStore(StoreBase):
     def put(self, key, value, ttl=0):
         table = self._table()
         update_expression = 'ADD #counter :increment SET #value = :value, #created_at = if_not_exists(#created_at, :now)'
+        expression_attribute_names={
+                '#value': DynamoDBStore._value,
+                '#counter': 'access_counter',
+                '#created_at': 'created_at',
+            }
+        expression_attribute_values={
+                ':increment': 1,
+                ':value': value,
+                ':now': int(time.time()),
+            }
         ttl_value = int(time.time())+ttl
+        
         if ttl>0:
             update_expression += ', #ttl = :ttl'
+            expression_attribute_names.update({'#ttl': DynamoDBStore._ttl})
+            expression_attribute_values.update({':ttl': ttl_value})
+            
         response = table.update_item(
             Key={DynamoDBStore._id: key},
             ReturnValues='ALL_OLD',
             UpdateExpression=update_expression,
-            ExpressionAttributeNames={
-                '#value': DynamoDBStore._value,
-                '#counter': 'access_counter',
-                '#created_at': 'created_at',
-                '#ttl': DynamoDBStore._ttl
-            },
-            ExpressionAttributeValues={
-                ':increment': 1,
-                ':value': value,
-                ':now': int(time.time()),
-                ':ttl': ttl_value,
-            }
+            ExpressionAttributeNames=expression_attribute_names,
+            ExpressionAttributeValues=expression_attribute_values
             )
         return response.get('Attributes')

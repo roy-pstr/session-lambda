@@ -4,9 +4,6 @@ from typing import Any, Optional
 class SessionStoreNotSet(Exception):
     pass
 
-class SessionDataNotSet(Exception):
-    pass
-
 @dataclass
 class State:
     value: Any = None
@@ -20,14 +17,12 @@ class _session:
             func, 
             id_key_name="session-id", 
             update=False,
-            return_session_id_in_header=True,
             ttl=0
         ):
         self.func = func
         self.id_key_name = id_key_name
         self.update = update
         self._first_call = True
-        self._return_session_id_in_header=return_session_id_in_header
         self._ttl_in_seconds = ttl
         setattr(self, "_state", State(value=None, key=None))
         
@@ -50,17 +45,14 @@ class _session:
                 session_id = event["headers"][self.id_key_name]
                 self.state.key = session_id
                 
-        if self.state.key is not None:
-            self.state.value = self.store.get(self.state.key)
-            if self.state.value is not None:
-                self._first_call = False
-            else:
-                self._first_call = True
-            
-    def _post_handler(self):
-        if self.state.value is None:
-            raise SessionDataNotSet("Session data is not set")
+        if self.state.key is None:
+            self.state.key = self.store.generate_key()
+            self._first_call = True
+        else:
+            self._first_call = False
+        self.state.value = self.store.get(self.state.key)
         
+    def _post_handler(self):
         if self._first_call or self.update:
             self.store.put(key=self.state.key, value=self.state.value, ttl=self._ttl_in_seconds)
 
@@ -76,8 +68,7 @@ class _session:
         response = self.func(event, context)
         
         # update session id in response's header
-        if self._return_session_id_in_header:
-            response = self._set_session_id_in_header(response)
+        response = self._set_session_id_in_header(response)
         
         self._post_handler()
         
@@ -86,21 +77,21 @@ class _session:
         return response
         
     def _teardown(self):
-        setattr(self, "_state", State(value=None, key=None))
+        setattr(_session, "_state", State(value=None, key=None))
+        
 
         
 def session(
         f=None, 
         id_key_name="session-id", 
         update=False,
-        return_session_id_in_header=True,
         ttl=0,
     ):
     if f is not None:
         return _session(f)
     else:
         def wrapper(f):
-            return _session(f, id_key_name, update, return_session_id_in_header, ttl)
+            return _session(f, id_key_name, update, ttl)
         return wrapper
     
     

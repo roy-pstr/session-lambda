@@ -27,7 +27,7 @@ class JSONFileStore(StoreBase):
     def get(self, key):
         return self._data().get(key)
     
-    def put(self, key, value):
+    def put(self, key, value, ttl=0):
         data = self._data()
         with open(self._store, "w") as f:
             data[key] = value
