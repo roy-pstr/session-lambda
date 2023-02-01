@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "session_lambda"
+version = "0.1.0"
+description = "A simple session manager for aws lambda function using dynamodb"
+authors = ["Roy Pasternak <roy.pasternakk@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "session_lambda"}]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+boto3 = "^1.26.60"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
