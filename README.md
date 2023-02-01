@@ -6,7 +6,7 @@ A simple way to manage sessions for AWS Lambdas
 pip install session-lambda
 ```
 
-## Example
+## Usage
 Set `SESSION_LAMBDA_DYNAMODB_TABLE_NAME` env var:
 ```
 export SESSION_LAMBDA_DYNAMODB_TABLE_NAME=<table-name>
