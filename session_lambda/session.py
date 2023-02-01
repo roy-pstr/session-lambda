@@ -1,6 +1,12 @@
 from dataclasses import dataclass
 from typing import Any, Optional
 
+class SessionStoreNotSet(Exception):
+    pass
+
+class SessionDataNotSet(Exception):
+    pass
+
 @dataclass
 class State:
     value: Any = None
@@ -27,7 +33,7 @@ class _session:
     @property
     def store(cls):
         if cls._store is None:
-            raise ValueError("Store not set")
+            raise SessionStoreNotSet("Store not set")
         return cls._store 
     
     @classmethod
@@ -51,7 +57,7 @@ class _session:
             
     def _post_handler(self):
         if self.state.value is None:
-            raise ValueError("Session data is not set")
+            raise SessionDataNotSet("Session data is not set")
         
         if self._first_call or self.update:
             self.store.put(key=self.state.key, value=self.state.value)

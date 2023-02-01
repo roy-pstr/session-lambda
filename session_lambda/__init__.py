@@ -1,5 +1,5 @@
 import os
-from .session import session, use_store, set_session_data, get_session_data
+from .session import session, use_store, set_session_data, get_session_data, SessionDataNotSet, SessionStoreNotSet
 from .store import RuntimeStore, JSONFileStore, DynamoDBStore
 
 from typing import Optional

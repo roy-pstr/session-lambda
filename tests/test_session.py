@@ -2,12 +2,12 @@ import json
 from typing import Dict, Tuple
 import pytest
 from session_lambda import session, use_store, RuntimeStore,DynamoDBStore, set_session_data, get_session_data
-
+from session_lambda import SessionStoreNotSet, SessionDataNotSet
 def test_session_store_not_set():
     @session
     def lambda_handler(event: Dict, context: Dict) -> Tuple[Dict, Dict]:
         return
-    with pytest.raises(ValueError):
+    with pytest.raises(SessionStoreNotSet):
         lambda_handler({'headers':{"session-id": ""}}, {})
 
 def test_session_state_not_set():
@@ -21,16 +21,11 @@ def test_session_state_not_set():
             }}
         # set_session_data(data="hello world")      
         return response
-    with pytest.raises(ValueError):
+    with pytest.raises(SessionDataNotSet):
         response = lambda_handler({'headers':{"session-id": "1"}}, {})
 
-@pytest.mark.parametrize('_Store,store', 
-                        [
-                            (RuntimeStore, {}),
-                            # (DynamoDBStore, 'session-lambda'),
-                        ])
-def test_session_decorator(_Store, store):
-    use_store(_Store(store))
+def test_session_decorator(dynamodb_table_name):    
+    use_store(DynamoDBStore(dynamodb_table_name))
     @session
     def lambda_handler(event: Dict, context: Dict):
         

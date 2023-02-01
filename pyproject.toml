@@ -16,6 +16,7 @@ boto3 = "^1.26.60"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
+moto = "^4.1.1"
 
 [build-system]
 requires = ["poetry-core"]
