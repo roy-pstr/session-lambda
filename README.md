@@ -8,6 +8,12 @@ A simple way to manage sessions for AWS Lambdas
 pip install session-lambda
 ```
 
+## Prerequisites
+### DynamoDB
+- Create a table in DynamoDB for the lambda's sessions
+- The table should have a primary key named `key` with type string
+- [optional] Enable TTL in your DynamoDB table with attribute named `ttl`
+
 ## Usage
 Set `SESSION_LAMBDA_DYNAMODB_TABLE_NAME` env var:
 ```bash
