@@ -1,5 +1,4 @@
-![](assets/session_management_with.jpg | width=100)
-
+<img src="assets/session_management_with.jpg" data-canonical-src="assets/session_management_with.jpg" width="520" height="252" />
 # Session Lambda
 A simple way to manage sessions for AWS Lambdas
 
