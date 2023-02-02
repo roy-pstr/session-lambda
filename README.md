@@ -1,10 +1,12 @@
+# Session Lambda
+
 <p align="center">
 <img src="assets/session_management_with.jpg" data-canonical-src="assets/session_management_with.jpg"/>
 </p>
 
-# Session Lambda
-
-A simple way to manage sessions for AWS Lambdas
+<p align="center">
+    <em>A simple way to manage sessions for AWS Lambdas</em>
+</p>
 
 ## Install
 ```
