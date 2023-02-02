@@ -1,4 +1,4 @@
-![alt text](assets/session_management_with.jpg)
+![](assets/session_management_with.jpg | width=100)
 
 # Session Lambda
 A simple way to manage sessions for AWS Lambdas
