@@ -24,7 +24,20 @@ def test_session_id_in_response_headers():
         return response
     response = lambda_handler({}, {})
     assert 'session-id' in response.get('headers')
-
+def test_session_id_in_response_headers_as_str():
+    use_store(RuntimeStore({}))
+    @session
+    def lambda_handler(event: Dict, context: Dict):
+        response ={
+                "statusCode": 200,
+                "headers": {
+                    "Content-Type": "application/json",
+                }
+            }
+        return json.dumps(response)
+    response = lambda_handler({}, {})
+    assert 'session-id' in json.loads(response).get('headers')
+    
 def test_session_decorator(dynamodb_table_name):    
     use_store(DynamoDBStore(dynamodb_table_name))
     @session

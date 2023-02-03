@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import json
 from typing import Any, Optional
 
 class SessionStoreNotSet(Exception):
@@ -60,7 +61,19 @@ class _session:
         if isinstance(response, dict):
             if "headers" in response:
                 response["headers"][self.id_key_name] = self.state.key
-        return response
+            return response
+        elif isinstance(response, str):
+            try:
+                _response = json.loads(response)
+                if "headers" in _response:
+                    _response["headers"][self.id_key_name] = self.state.key
+                    response = json.dumps(_response)
+                return response
+            except:
+                pass
+        else:
+            return response
+                
             
     def __call__(self, event, context):
         self._pre_handler(event, context)
