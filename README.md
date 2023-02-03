@@ -1,7 +1,7 @@
 # Session Lambda
 
 <p align="center">
-<img src="assets/session_management_with.jpg" data-canonical-src="assets/session_management_with.jpg"/>
+<img src="assets/session_management_with.jpg" data-canonical-src="assets/session_management_with.jpg" width=400/>
 </p>
 
 <p align="center">
