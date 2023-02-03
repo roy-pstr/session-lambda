@@ -65,6 +65,54 @@ def test_session_decorator(dynamodb_table_name):
     response = lambda_handler({'headers':{"session-id": session_id[1:]}}, {})
     assert  response.get('body') is None
 
+def test_session_decorator_with_accept_client_generated_session_id(dynamodb_table_name):    
+    use_store(DynamoDBStore(dynamodb_table_name))
+    @session
+    def lambda_handler(event: Dict, context: Dict):
+        session_data = get_session_data()
+        
+        response = {
+                "statusCode": 200,
+                "headers": {
+                    "Content-Type": "application/json",
+                },
+                "body": session_data
+            }
+        
+        set_session_data(data="hello world")
+        return response
+    
+    client_session_id = "1234567890"
+    response = lambda_handler({'headers':{"session-id": client_session_id}}, {})
+    assert  response.get('body') is None
+    session_id = response.get('headers').get('session-id')
+    assert session_id == client_session_id
+    response = lambda_handler({'headers':{"session-id": client_session_id}}, {})
+    assert  response.get('body') is None
+    
+    @session(accept_client_generated_session_id=True)
+    def lambda_handler(event: Dict, context: Dict):
+        session_data = get_session_data()
+        
+        response = {
+                "statusCode": 200,
+                "headers": {
+                    "Content-Type": "application/json",
+                },
+                "body": session_data
+            }
+        
+        set_session_data(data="hello world")
+        return response
+    
+    client_session_id = "1234567890"
+    response = lambda_handler({'headers':{"session-id": client_session_id}}, {})
+    assert  response.get('body') is None
+    session_id = response.get('headers').get('session-id')
+    assert session_id == client_session_id
+    response = lambda_handler({'headers':{"session-id": client_session_id}}, {})
+    assert  response.get('body') == "hello world"
+    
 def test_session_decorator_ttl(dynamodb_table_name):    
     use_store(DynamoDBStore(dynamodb_table_name))
     @session(ttl=10)

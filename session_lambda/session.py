@@ -18,13 +18,15 @@ class _session:
             func, 
             id_key_name="session-id", 
             update=False,
-            ttl=0
+            ttl=0,
+            accept_client_generated_session_id=False
         ):
         self.func = func
         self.id_key_name = id_key_name
         self.update = update
         self._first_call = True
         self._ttl_in_seconds = ttl
+        self._accept_client_generated_session_id = accept_client_generated_session_id
         setattr(self, "_state", State(value=None, key=None))
         
     @classmethod
@@ -49,9 +51,13 @@ class _session:
         if self.state.key is None:
             self.state.key = self.store.generate_key()
             self._first_call = True
+            self.state.value = None
         else:
-            self._first_call = False
-        self.state.value = self.store.get(self.state.key)
+            self.state.value = self.store.get(self.state.key)
+            if self._accept_client_generated_session_id and self.state.value is None:
+                self._first_call = True
+            else:
+                self._first_call = False
         
     def _post_handler(self):
         if self._first_call or self.update:
@@ -99,12 +105,13 @@ def session(
         id_key_name="session-id", 
         update=False,
         ttl=0,
+        accept_client_generated_session_id=False
     ):
     if f is not None:
         return _session(f)
     else:
         def wrapper(f):
-            return _session(f, id_key_name, update, ttl)
+            return _session(f, id_key_name, update, ttl, accept_client_generated_session_id)
         return wrapper
     
     
