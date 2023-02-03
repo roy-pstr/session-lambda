@@ -31,5 +31,5 @@ class JSONFileStore(StoreBase):
         data = self._data()
         with open(self._store, "w") as f:
             data[key] = value
-            json.dump(data, f)
+            json.dump(data, f, indent=4)
         return value
