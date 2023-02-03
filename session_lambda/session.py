@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import json
 from typing import Any, Optional
+import secrets
 
 class SessionStoreNotSet(Exception):
     pass
@@ -19,16 +20,18 @@ class _session:
             id_key_name="session-id", 
             update=False,
             ttl=0,
-            accept_client_generated_session_id=False
         ):
         self.func = func
         self.id_key_name = id_key_name
         self.update = update
-        self._first_call = True
+        self._initial_session = True
         self._ttl_in_seconds = ttl
-        self._accept_client_generated_session_id = accept_client_generated_session_id
         setattr(self, "_state", State(value=None, key=None))
-        
+    
+    def generate_key(self):
+        # https://docs.python.org/3/library/secrets.html
+        return secrets.token_urlsafe(32)
+    
     @classmethod
     @property
     def store(cls):
@@ -41,26 +44,64 @@ class _session:
     def state(cls):
         return cls._state
     
-    def _pre_handler(self, event, context):
-        session_id = None
+    def _get_session_id_from_event(self, event):
         if "headers" in event:
             if self.id_key_name in event["headers"]:
-                session_id = event["headers"][self.id_key_name]
-                self.state.key = session_id
-                
-        if self.state.key is None:
-            self.state.key = self.store.generate_key()
-            self._first_call = True
-            self.state.value = None
+                return event["headers"][self.id_key_name]
+        return None
+    
+    def _pre_handler(self, event, context):
+        """
+        This set the self.state: key and value
+        - key is the session_id
+        - value is the session_data
+        A session can be in one of the following states:
+        1. New session by server
+            - session_id is not present in the event
+        2. New session by client
+            - session_id is present in the event
+            - session_id is not present in the store
+        3. Existing session
+            - session_id is present in the event
+            - session_id is present in the store
+        """
+        initial_session: bool = True
+        session_id: Optional[str] = self._get_session_id_from_event(event)
+        session_data = None
+        
+        if session_id is None:
+            # session_id is not present in the event -> generate a new session_id
+            # this will be the first time accessing the session
+            session_id = self.generate_key()
+            initial_session = True
         else:
-            self.state.value = self.store.get(self.state.key)
-            if self._accept_client_generated_session_id and self.state.value is None:
-                self._first_call = True
+            # session_id was found in the event 
+            # check if session_id is present in the store
+            session_data, session_exist = self.store.get(session_id)
+            if not session_exist:
+                # session_id is not present in the store 
+                # -> this is client generated session_id
+                # this will be the first time accessing the session 
+                initial_session = True
+                assert session_data is None
             else:
-                self._first_call = False
+                # session_id is present in the store 
+                # -> this is not the first time accessing the session
+                initial_session = False
+        
+        self.state.key=session_id
+        self.state.value=session_data
+        self._initial_session = initial_session
         
     def _post_handler(self):
-        if self._first_call or self.update:
+        """
+        This modify data in store.
+        There are two cases in which we will update the store:
+        - Initial session (new session)
+        - Update session (update=True)
+        """
+        
+        if self._initial_session or self.update:
             self.store.put(key=self.state.key, value=self.state.value, ttl=self._ttl_in_seconds)
 
     def _set_session_id_in_header(self, response):
@@ -105,13 +146,12 @@ def session(
         id_key_name="session-id", 
         update=False,
         ttl=0,
-        accept_client_generated_session_id=False
     ):
     if f is not None:
         return _session(f)
     else:
         def wrapper(f):
-            return _session(f, id_key_name, update, ttl, accept_client_generated_session_id)
+            return _session(f, id_key_name, update, ttl)
         return wrapper
     
     

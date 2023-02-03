@@ -25,7 +25,8 @@ class JSONFileStore(StoreBase):
             return json.load(f)
     
     def get(self, key):
-        return self._data().get(key)
+        data = self._data()
+        return data.get(key), key in data
     
     def put(self, key, value, ttl=0):
         data = self._data()

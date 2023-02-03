@@ -1,5 +1,6 @@
 import json
 import time
+from typing import Any, Tuple
 import boto3, botocore
 from .base import StoreBase
 
@@ -33,14 +34,16 @@ class DynamoDBStore(StoreBase):
                 raise error
         return table
     
-    def get(self, key, return_item=False):
+    def get(self, key, return_item=False) -> Tuple[Any, bool]:
         table = self._table()
         response = table.get_item(
             Key={DynamoDBStore._id: key},
         )
+        item = response.get('Item')
+        exist = not (item is None)
         if return_item:
-            return response.get('Item',{})
-        return response.get('Item',{}).get(DynamoDBStore._value)
+            return item, exist
+        return response.get('Item',{}).get(DynamoDBStore._value), exist
     
     def put(self, key, value, ttl=0):
         table = self._table()

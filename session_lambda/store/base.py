@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-import secrets
+from typing import Any, Tuple
 
 class StoreBase(ABC):
     """
@@ -9,16 +9,13 @@ class StoreBase(ABC):
         self._store = store
         self._validate_store()
     
-    def generate_key(self):
-        # https://docs.python.org/3/library/secrets.html
-        return secrets.token_urlsafe(32)
     
     @abstractmethod
     def _validate_store(self):
         ...
         
     @abstractmethod
-    def get(self, key):
+    def get(self, key) -> Tuple[Any, bool]:
         ...
     
     @abstractmethod

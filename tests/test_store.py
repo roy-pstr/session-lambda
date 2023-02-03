@@ -13,18 +13,20 @@ def test_store_base():
         store = StoreBase()
 
 def store_scenario(store):
-    assert store.get('foo') == None
+    assert store.get('foo') == (None, False)
+    store.put('foo', None)
+    assert store.get('foo') == (None, True)
     
     store.put('foo', 'bar')
-    assert store.get('foo') == 'bar'
+    assert store.get('foo') == ('bar', True)
     
     store.put('foo', 'bar')
-    assert store.get('foo') == 'bar'
+    assert store.get('foo') == ('bar', True)
     
     store.put('foo', 'bar2')
-    assert store.get('foo') == 'bar2'
+    assert store.get('foo') == ('bar2', True)
     
-    assert store.get('not_exist') == None
+    assert store.get('not_exist') == (None, False)
 
 @pytest.mark.parametrize('_Store,store', 
                         [
@@ -44,14 +46,14 @@ def test_dynamodb_store_ttl(dynamodb_table_name):
     # test ttl with store.put when store is DynamoDBStore
     store = DynamoDBStore(dynamodb_table_name)
     store.put('foo', 'bar', ttl=0)
-    item = store.get('foo', return_item=True)
+    item, exist = store.get('foo', return_item=True)
     assert 'ttl' not in item
     store.put('foo', 'bar', ttl=1)
-    item = store.get('foo', return_item=True)
+    item, exist = store.get('foo', return_item=True)
     assert 'ttl' in item
     first_ttl = item['ttl']
     store.put('foo', 'bar', ttl=10)
-    item = store.get('foo', return_item=True)
+    item, exist = store.get('foo', return_item=True)
     second_ttl = item['ttl']
     assert second_ttl > first_ttl
     

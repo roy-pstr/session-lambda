@@ -12,7 +12,7 @@ class RuntimeStore(StoreBase):
             raise TypeError("Store must be a dictionary")
         
     def get(self, key):
-        return self._store.get(key)
+        return self._store.get(key), key in self._store
     
     def put(self, key, value, ttl=0):
         self._store[key] = value
