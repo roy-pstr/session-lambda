@@ -14,7 +14,7 @@ pip install session-lambda
 ```
 
 ## Prerequisites
-### DynamoDB
+### DynamoDB Table
 - A table in DynamoDB with a primary key named `key` with type string  
 - [optional] Enable TTL in your DynamoDB table with attribute named `ttl`
 
