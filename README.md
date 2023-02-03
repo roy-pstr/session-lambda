@@ -1,7 +1,7 @@
 # Session Lambda
 
 <p align="center">
-<img src="assets/session_management_with.jpg" data-canonical-src="assets/session_management_with.jpg"/>
+<img src="assets/session_management_with.jpg" data-canonical-src="assets/session_management_with.jpg" width=400/>
 </p>
 
 <p align="center">
@@ -14,7 +14,7 @@ pip install session-lambda
 ```
 
 ## Prerequisites
-### DynamoDB
+### DynamoDB Table
 - A table in DynamoDB with a primary key named `key` with type string  
 - [optional] Enable TTL in your DynamoDB table with attribute named `ttl`
 
