@@ -45,10 +45,7 @@ class _session:
         return cls._state
     
     def _get_session_id_from_event(self, event):
-        if "headers" in event:
-            if self.id_key_name in event["headers"]:
-                return event["headers"][self.id_key_name]
-        return None
+        return event.get("headers", {}).get(self.id_key_name)
     
     def _pre_handler(self, event, context):
         """
