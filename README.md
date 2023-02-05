@@ -8,6 +8,8 @@
     <em>A simple way to manage sessions for AWS Lambdas</em>
 </p>
 
+This package simplfy the way one can use DynamoDB as a key/value presistance layer for AWS Lambda - using a single python decorator.
+
 ## Install
 ```
 pip install session-lambda
