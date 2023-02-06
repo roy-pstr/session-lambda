@@ -27,7 +27,6 @@ export SESSION_LAMBDA_DYNAMODB_TABLE_NAME=<table-name>
 ```
 Run the following python code:
 ```python
-import time
 from session_lambda import session, set_session_data, get_session_data
 
 @session
@@ -59,7 +58,6 @@ None
 ```
 This time using the `update=True` mode:
 ```python
-import time
 from session_lambda import session, set_session_data, get_session_data
 
 @session(update=True)
