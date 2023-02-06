@@ -102,3 +102,10 @@ def lambda_handler(event, context):
 
 ## Future Features
 - Support Schema validation for session data
+
+## Additional Inforamtion
+- Check this `session-lambda-example` repository for more usage examples:
+https://github.com/roy-pstr/session-lambda-example
+
+- Check this medium post for general guidance: 
+https://medium.com/@roy-pstr/a-simple-way-to-manage-sessions-with-aws-lambda-dynamodb-in-python-c7aae1aa7258
