@@ -8,6 +8,8 @@
     <em>A simple way to manage sessions for AWS Lambdas</em>
 </p>
 
+This package simplfy the way one can use DynamoDB as a key/value presistance layer for AWS Lambda - using a single python decorator.
+
 ## Install
 ```
 pip install session-lambda
@@ -15,7 +17,7 @@ pip install session-lambda
 
 ## Prerequisites
 ### DynamoDB Table
-- A table in DynamoDB with a primary key named `key` with type string  
+- A table in DynamoDB with a primary key named `key` of type string
 - [optional] Enable TTL in your DynamoDB table with attribute named `ttl`
 
 ## Usage
@@ -25,7 +27,6 @@ export SESSION_LAMBDA_DYNAMODB_TABLE_NAME=<table-name>
 ```
 Run the following python code:
 ```python
-import time
 from session_lambda import session, set_session_data, get_session_data
 
 @session
@@ -57,7 +58,6 @@ None
 ```
 This time using the `update=True` mode:
 ```python
-import time
 from session_lambda import session, set_session_data, get_session_data
 
 @session(update=True)
@@ -100,3 +100,10 @@ def lambda_handler(event, context):
 
 ## Future Features
 - Support Schema validation for session data
+
+## Additional Inforamtion
+- Check this `session-lambda-example` repository for more usage examples:
+https://github.com/roy-pstr/session-lambda-example
+
+- Check this medium post for general guidance: 
+https://medium.com/@roy-pstr/a-simple-way-to-manage-sessions-with-aws-lambda-dynamodb-in-python-c7aae1aa7258
