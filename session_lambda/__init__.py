@@ -9,7 +9,7 @@ def init_session_store(
     runtime: Optional[dict] = None):
     
     if runtime is not None:
-        store = RuntimeStore()
+        store = RuntimeStore(store=runtime)
         use_store(store)
     
     elif file_path is not None:
