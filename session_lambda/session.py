@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import json
 from typing import Any, Optional
 import secrets
+import hashlib
 
 class SessionStoreNotSet(Exception):
     pass
@@ -14,6 +15,7 @@ class State:
 class _session:
     _store = None
     _state: Optional[State] = State()
+    _initial_session = True
     
     def __init__(self, 
             func, 
@@ -24,12 +26,13 @@ class _session:
         self.func = func
         self.id_key_name = id_key_name
         self.update = update
-        self._initial_session = True
         self._ttl_in_seconds = ttl
         setattr(self, "_state", State(value=None, key=None))
     
-    def generate_key(self):
-        # https://docs.python.org/3/library/secrets.html
+    @classmethod
+    def generate_key(cls, seed: Optional[str]=None):
+        if seed is not None:
+            return hashlib.sha256(seed.encode()).hexdigest()
         return secrets.token_urlsafe(32)
     
     @classmethod
@@ -44,10 +47,24 @@ class _session:
     def state(cls):
         return cls._state
     
+    @classmethod
+    @property
+    def initial_session(cls):
+        return cls._initial_session
+    
+    @classmethod
+    def _use_session_id_from_seed(cls, seed: str):
+        """
+        This used to override the _pre_handler behavior. 
+        It will use the seed to set the state (the seed will be used to generate the session_id)
+        """
+        cls._initial_session = cls._set_state(session_id=None, seed=seed)
+        
     def _get_session_id_from_event(self, event):
         return event.get("headers", {}).get(self.id_key_name)
     
-    def _pre_handler(self, event, context):
+    @classmethod
+    def _set_state(cls, session_id, seed=None) -> bool:
         """
         This set the self.state: key and value
         - key is the session_id
@@ -62,19 +79,21 @@ class _session:
             - session_id is present in the event
             - session_id is present in the store
         """
-        initial_session: bool = True
-        session_id: Optional[str] = self._get_session_id_from_event(event)
+        initial_session: bool = False
         session_data = None
-        
+        check_session_data = session_id is not None or seed is not None
         if session_id is None:
             # session_id is not present in the event -> generate a new session_id
             # this will be the first time accessing the session
-            session_id = self.generate_key()
+            # Unless seed was given, then we will use the seed to generate the session_id
+            # And check weather the session_id is present in the store
+            session_id = cls.generate_key(seed)
             initial_session = True
-        else:
-            # session_id was found in the event 
+            
+        if check_session_data:
+            # session_id was found in the event or a seed was given
             # check if session_id is present in the store
-            session_data, session_exist = self.store.get(session_id)
+            session_data, session_exist = cls.store.get(session_id)
             if not session_exist:
                 # session_id is not present in the store 
                 # -> this is client generated session_id
@@ -85,10 +104,20 @@ class _session:
                 # session_id is present in the store 
                 # -> this is not the first time accessing the session
                 initial_session = False
+
+        cls.state.key=session_id
+        cls.state.value=session_data
         
-        self.state.key=session_id
-        self.state.value=session_data
-        self._initial_session = initial_session
+        return initial_session
+        
+    def _pre_handler(self, event, context):
+        """
+        This extract session_id from event if exists
+        Then, sets the self.state: key and value
+        And finally set self._initial_session - which describe if it is the first time accessing this session id.
+        """
+        session_id: Optional[str] = self._get_session_id_from_event(event)
+        self.initial_session = self._set_state(session_id)
         
     def _post_handler(self):
         """
@@ -151,9 +180,11 @@ def session(
             return _session(f, id_key_name, update, ttl)
         return wrapper
     
-    
+use_session_id_from_seed = _session._use_session_id_from_seed
 use_store = lambda x: setattr(_session, "_store", x)
 get_session_state = lambda: getattr(_session, "_state")
 get_session_data = lambda: getattr(_session, "_state").value
 set_session_state = lambda x: setattr(_session, "_state", x)
 set_session_data = lambda data: setattr(get_session_state(), "value", data)
+
+

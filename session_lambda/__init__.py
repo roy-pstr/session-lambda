@@ -1,5 +1,5 @@
 import os
-from .session import session, use_store, set_session_data, get_session_data, SessionStoreNotSet
+from .session import session, use_store, set_session_data, get_session_data, SessionStoreNotSet, use_session_id_from_seed
 from .store import RuntimeStore, JSONFileStore, DynamoDBStore
 
 from typing import Optional
@@ -8,7 +8,7 @@ def init_session_store(
     file_path: Optional[str] = None, 
     runtime: Optional[dict] = None):
     
-    if runtime:
+    if runtime is not None:
         store = RuntimeStore()
         use_store(store)
     

@@ -2,7 +2,7 @@ import json
 from typing import Dict, Tuple
 import pytest
 from session_lambda.session import _session
-from session_lambda import session, use_store, RuntimeStore,DynamoDBStore, set_session_data, get_session_data
+from session_lambda import session, use_store, RuntimeStore,DynamoDBStore, set_session_data, get_session_data, use_session_id_from_seed
 from session_lambda import SessionStoreNotSet
 def test_session_store_not_set():
     @session
@@ -125,3 +125,30 @@ def test_session_decorator_update(dynamodb_table_name):
     response = lambda_handler({'headers':{"session-id": session_id}}, {})
     assert response.get('body') == 2
     
+def test_session_decorator_with_seed(dynamodb_table_name):    
+    use_store(DynamoDBStore(dynamodb_table_name))
+    @session
+    def lambda_handler(event: Dict, context: Dict):
+        use_session_id_from_seed("seed")
+        session_data = get_session_data()
+        
+        response = {
+                "statusCode": 200,
+                "headers": {
+                    "Content-Type": "application/json",
+                },
+                "body": session_data
+            }
+        
+        set_session_data(data="hello world")
+        return response
+    
+    response = lambda_handler({}, {})
+    assert  response.get('body') is None
+    session_id = response.get('headers').get('session-id')
+    
+    response = lambda_handler({'headers':{"session-id": session_id}}, {})
+    assert  response.get('body') == "hello world"
+
+    response = lambda_handler({'headers':{"session-id": session_id[1:]}}, {})
+    assert  response.get('body') == "hello world"
